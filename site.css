@@ -342,5 +342,7 @@ body,.bar,.chapter,.door i,.contact h3,.soon .label,#world .f path{transition:no
 
 #world .spk{stroke:var(--copper);opacity:.9}
 
+footer svg{height:40px!important;width:auto} footer .row{gap:16px}
+
 /* gianniris-live-fixes */
 .bigl a{transition:transform .5s var(--ease)!important}.wordmark .i{transition:none!important}
