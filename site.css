@@ -257,7 +257,7 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:12px 28px;align-items:center;justif
 footer .row{display:flex;align-items:center;gap:12px}
 footer svg{height:22px;width:auto}
 footer .fa{fill:var(--ink)} footer .fb{fill:var(--logo-copper)}
-
+.markart .spark{opacity:0;transition:opacity 1.2s var(--ease)} .markart[data-focus="intro"] .spark,.markart[data-focus="promise"] .spark{opacity:.85} @media (prefers-reduced-motion:reduce){.markart .spark{opacity:.85}}
 /* immersive preview: one continuous stage behind every page; the ground turns from ivory to navy as the story does */
 [hidden]{display:none!important}
 :root{--ink-2:#405166}
@@ -337,6 +337,10 @@ body,.bar,.chapter,.door i,.contact h3,.soon .label,#world .f path{transition:no
 .value{background:var(--card)!important}
 .markart[data-focus="color"] .g{opacity:1;transform:scale(1.25)}
 @media (prefers-reduced-motion:reduce){.markart{position:relative!important;top:auto!important}}
+
+@keyframes comeA{from{transform:translate(-46px,10px);opacity:0}to{transform:none;opacity:1}}@keyframes comeB{from{transform:translate(52px,-14px);opacity:0}to{transform:none;opacity:1}}@keyframes spark{0%,55%{opacity:0}75%{opacity:1}100%{opacity:.85}}@media (prefers-reduced-motion:no-preference){.markart .fa{animation:comeA 1.9s var(--ease) .3s backwards}.markart .fb{animation:comeB 1.9s var(--ease) .3s backwards}.markart[data-focus=intro] .spark{animation:spark 2.6s ease .3s backwards}}
+
+#world .spk{stroke:var(--copper);opacity:.9}
 
 /* gianniris-live-fixes */
 .bigl a{transition:transform .5s var(--ease)!important}.wordmark .i{transition:none!important}
