@@ -45,3 +45,83 @@ secs=qa('[data-t]');kick();
 function allowed(t){return t&&t.closest&&t.closest('.contact')}['copy','cut','contextmenu','dragstart','selectstart'].forEach(function(ev){D.addEventListener(ev,function(e){var n=getSelection().anchorNode;if(!allowed(e.target)&&!(ev==='copy'&&allowed(n&&n.parentElement)))e.preventDefault()})});
 function say(t){var z=q('#say');if(z)z.textContent=t}var btn=q('#copy'),addr=q('#addr');if(btn)btn.addEventListener('click',function(){function sel(){var r=D.createRange();r.selectNodeContents(addr);var s=getSelection();s.removeAllRanges();s.addRange(r);btn.textContent='Selected';say('Email address selected. Copy it now.')}try{navigator.clipboard.writeText(addr.textContent).then(function(){btn.textContent='Copied';say('Email address copied');setTimeout(function(){btn.textContent='Copy email'},2000)},sel)}catch(e){sel()}});
 })();
+
+(() => {
+  function observeLanes() {
+    if (!("IntersectionObserver" in window)) return;
+
+    const narrow = window.matchMedia("(max-width: 55rem)");
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    document.querySelectorAll(".lane-section").forEach((section) => {
+      const street = section.querySelector(".lane-apps");
+      const houses = [...section.querySelectorAll(".lane-house")];
+      if (!street || !houses.length) return;
+
+      const seen = new Set();
+      const observer = new IntersectionObserver((entries) => {
+        for (const { target, isIntersecting } of entries) {
+          if (!isIntersecting || reduced.matches) continue;
+
+          observer.unobserve(target);
+
+          if (target === street) {
+            houses.forEach((house) => seen.add(house));
+            street.setAttribute("data-lane-entered", "");
+          } else {
+            seen.add(target);
+            target.closest(".lane-stop")?.setAttribute("data-lane-entered", "");
+          }
+        }
+      }, { threshold: 0.12 });
+
+      function observeLayout() {
+        observer.disconnect();
+        if (reduced.matches || seen.size === houses.length) return;
+
+        if (!narrow.matches && seen.size === 0) {
+          observer.observe(street);
+          return;
+        }
+
+        houses.filter((house) => !seen.has(house)).forEach((house) => {
+          observer.observe(house);
+        });
+      }
+
+      narrow.addEventListener("change", observeLayout);
+      reduced.addEventListener("change", observeLayout);
+      observeLayout();
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", observeLanes, { once: true });
+  } else {
+    observeLanes();
+  }
+})();
+/* The Lane as collage: each app's words rise in as it arrives; its scene drifts gently (transform only).
+   Without JS the words are simply shown; with reduced motion nothing moves. */
+(() => {
+  const apps = [...document.querySelectorAll(".lane-section .lane-app")];
+  if (!apps.length) return;
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (!("IntersectionObserver" in window) || reduced) { apps.forEach((a) => a.classList.add("is-in")); return; }
+  const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("is-in"); io.unobserve(e.target); } }), { threshold: 0.25 });
+  apps.forEach((a) => io.observe(a));
+  let raf = 0;
+  const drift = () => {
+    raf = 0;
+    const H = window.innerHeight;
+    for (const a of apps) {
+      const r = a.getBoundingClientRect();
+      if (r.bottom < 0 || r.top > H) continue;
+      const t = (r.top + r.height / 2 - H / 2) / H; // -1..1 around the middle of the screen
+      a.style.setProperty("--lane-shift", (t * -40).toFixed(1) + "px");
+    }
+  };
+  window.addEventListener("scroll", () => { if (!raf) raf = requestAnimationFrame(drift); }, { passive: true });
+  drift();
+})();
+
